@@ -1,9 +1,19 @@
+var opened = 0;
+
+function disableChatbotButton(){
+	document.getElementById("chatbot_button").disabled = true;
+	setTimeout(function(){document.getElementById("chatbot_button").disabled = false;},2000);
+}
+
 jQuery(document).ready(function($) {
 	jQuery(document).on('click', '.iconInner', function(e) {//funzione di jquery che da vita al bot
 		jQuery(this).parents('.botIcon').addClass('showBotSubject');
 		$("[name='msg']").focus();
+		
+		opened++;
 
 		var messaggio='';//in base al momento della giornata fornisce un messaggio di benvenuto differente
+		if (opened<=1){
 		var i_am_bot = 'sono il bot di Alberto e sono qui per aiutarti. Cosa vuoi sapere?'
 		nowtime = new Date();
 		nowhoue = nowtime.getHours();
@@ -14,9 +24,11 @@ jQuery(document).ready(function($) {
 		} else {
 			messaggio='Buona sera, ' + i_am_bot;
 		}
-
-		$('.Messages_list').append('<div class="msg"><span class="avtr"><figure style="background-image: url(https://mrseankumar25.github.io/Sandeep-Kumar-Frontend-Developer-UI-Specialist/images/avatar.png)"></figure></span><span class="responsText">' + messaggio + '</span></div>');
+		$('.Messages_list').append('<div class="msg"><span class="avtr"><figure style="background-image: url(https://img.freepik.com/free-vector/cute-robot-cartoon-vector-icon-illustration-techology-robot-icon-concept-isolated-premium-vector-flat-cartoon-style_138676-1474.jpg?w=740)"></figure></span><span class="responsText">' + messaggio + '</span></div>');
 		$("[name='msg']").val("");
+
+		}
+
 
 	});
 
@@ -36,6 +48,8 @@ jQuery(document).ready(function($) {
 	$(document).on("submit", "#messenger", function(e) {
 		e.preventDefault();
 
+		disableChatbotButton()
+
 		var val = $("[name=msg]").val().toLowerCase();
 		var mainval = $("[name=msg]").val();
 		name = '';
@@ -43,42 +57,35 @@ jQuery(document).ready(function($) {
 		nowhoue = nowtime.getHours();
 
 		function userMsg(msg) {//funzione che fa apparire i messaggi di chi digita
-			$('.Messages_list').append('<div class="msg user"><span class="avtr"><figure style="background-image: url(https://mrseankumar25.github.io/Sandeep-Kumar-Frontend-Developer-UI-Specialist/images/avatar.png)"></figure></span><span class="responsText">' + mainval + '</span></div>');
+			$('.Messages_list').append('<div class="msg user"><span class="avtr"><figure style="background-image: url(https://img.freepik.com/free-vector/cute-robot-cartoon-vector-icon-illustration-techology-robot-icon-concept-isolated-premium-vector-flat-cartoon-style_138676-1474.jpg?w=740)"></figure></span><span class="responsText">' + mainval + '</span></div>');
 		};
 		function appendMsg(msg) {//funzione che fa apparire i messaggi del bot
-			$('.Messages_list').append('<div class="msg"><span class="avtr"><figure style="background-image: url(https://mrseankumar25.github.io/Sandeep-Kumar-Frontend-Developer-UI-Specialist/images/avatar.png)"></figure></span><span class="responsText">' + msg + '</span></div>');
+			$('.Messages_list').append('<div class="msg"><span class="avtr"><figure style="background-image: url(https://img.freepik.com/free-vector/cute-robot-cartoon-vector-icon-illustration-techology-robot-icon-concept-isolated-premium-vector-flat-cartoon-style_138676-1474.jpg?w=740)"></figure></span><span class="responsText">' + msg + '</span></div>');
 			$("[name='msg']").val("");
 		};
 
 		//QUI c'è tutta la logica del bot
 		userMsg(mainval);
-		//messaggio di saluto che cambia in base all'orario della giornata
 		if( val.indexOf("salve") > -1 || val.indexOf("ciao") > -1|| val.indexOf("help") > -1|| val.indexOf("aiuto") > -1) {
 				appendMsg('Credo di averti già salutato ;-)');
 			
 		}
 		//da qui iniziano le domande da inserire e tutte le risposte da costruire
-		 else if ( val.indexOf("meteo") > -1 ) {
+		
+		 else {
+			var requestOptions = {
+				method: 'GET',
+				redirect: 'follow'
+			};
+		  var endpoint="http://127.0.0.1:5000/students/?template=1&text="+val
+		  fetch(endpoint, requestOptions)
+			.then(response => response.text())
+			.then(result => appendMsg(result))
+			.catch(error => console.log('error', error));
 
-			appendMsg("a caserta ci sono 28 gradi");
-			appendMsg("Basta così? (si/no)");
+			//appendMsg(result);
 
-		} else if( val.indexOf("si") > -1) {
-
-			var nowtime = new Date();
-			var nowhoue = nowtime.getHours();
-			appendMsg("E' stato un piacere aiutarti");
-
-			saybye();
-		} else if( val.indexOf("no") > -1) {
-
-			var nowtime = new Date();
-			var nowhoue = nowtime.getHours();
-			appendMsg("Allora chiedimi altro");
-
-		} else {
-			appendMsg("Scusa, non ho capito");
-		}
+		} 
 
 		function saybye() {
 			if (nowhoue <= 10) {
